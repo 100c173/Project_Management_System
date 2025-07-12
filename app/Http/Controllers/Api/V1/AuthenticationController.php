@@ -23,9 +23,10 @@ class AuthenticationController extends Controller
      */
     public function Register(StoreUserRequest $request):JsonResponse
     {
+      
         // Validate with strong password rules
-        $validated = $request->validate();
-
+        $validated = $request->validated();
+         
         // Create user with hashed password
         $user = User::create([
             'name'     => $validated['name'],
@@ -34,7 +35,7 @@ class AuthenticationController extends Controller
         ]);
 
         // Generate limited-scope token
-        $token = $user->createToke('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => "Registered Successfully",
@@ -53,7 +54,7 @@ class AuthenticationController extends Controller
      */
     public function login(LoginUserRequest $request):JsonResponse
     {
-        $credentials  = $request->validate();
+        $credentials  = $request->validated();
 
         $user = User::where('email', $credentials['email'])->first();
 
@@ -75,6 +76,7 @@ class AuthenticationController extends Controller
             'token'   => $token,
             'token_type' => 'Bearer',
             'expires_in' => '5 hours',
+            'user' => $user->only('id', 'name', 'email'),
         ]);
     }
 
